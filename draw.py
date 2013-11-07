@@ -27,11 +27,13 @@ class Canvas(QtGui.QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle("LCD Client")
+        self.setWindowTitle("LCD Draw!")
+        self.chars = []
 
         for char_row in range(2):
             for char_col in range(16):
                 char = Char(pos=Pos(row=char_row,col=char_col),pixels=[[0 for i in range(5)] for i in range(8)])
+                self.chars.append(char)
                 for pixel_row in range(8):
                     for pixel_col in range(5):
                         frame = QtGui.QFrame(self)
@@ -45,6 +47,7 @@ class Canvas(QtGui.QWidget):
                         frame.move(x, y);
 
                         frame.info = Pixel(pos=Pos(row=pixel_row,col=pixel_col),parent=char)
+
         self.show()
 
     def mouseMoveEvent(self, event):
@@ -87,7 +90,6 @@ class Canvas(QtGui.QWidget):
             rows.append(row)
 
         packet = [0]*6
-
 
         packet[0] = ((char.pos.col << 4) | (char.pos.row << 3) | (rows[0] >> 2)) & 0xFF
         packet[1] = ((rows[0] << 6) | (rows[1] << 1) | (rows[2] >> 4)) & 0xFF
