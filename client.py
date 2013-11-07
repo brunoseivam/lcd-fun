@@ -54,8 +54,9 @@ class Canvas(QtGui.QWidget):
                 target.setStyleSheet(blackSS)
                 pixel_row = target.info.pos.row
                 pixel_col = target.info.pos.col
-                target.info.parent.pixels[pixel_row][pixel_col] = 1
-                self.packetFromChar(target.info.parent)
+                if target.info.parent.pixels[pixel_row][pixel_col] != 1:
+                    target.info.parent.pixels[pixel_row][pixel_col] = 1
+                    self.packetFromChar(target.info.parent)
 
     def mousePressEvent(self, event):
         self.pressed = True
