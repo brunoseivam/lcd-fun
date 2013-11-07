@@ -99,7 +99,10 @@ class Canvas(QtGui.QWidget):
         ser.write("".join(map(chr, packet)))
 
 if __name__ == '__main__':
-    ser = serial.Serial("/dev/ttyACM1", 115200);
+    if len(sys.argv) < 2:
+        print "Usage: %s SERIAL_PORT" % sys.argv[0]
+        sys.exit()
+    ser = serial.Serial(sys.argv[1], 115200);
     app = QtGui.QApplication(sys.argv)
     ex = Canvas()
     sys.exit(app.exec_())
