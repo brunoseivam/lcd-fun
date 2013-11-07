@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import time
 from PyQt4 import QtGui, QtCore
 import serial
 import collections
@@ -29,6 +30,7 @@ class Canvas(QtGui.QWidget):
     def initUI(self):
         self.setWindowTitle("LCD Draw!")
         self.chars = []
+        self.frames = []
 
         for char_row in range(2):
             for char_col in range(16):
@@ -47,6 +49,22 @@ class Canvas(QtGui.QWidget):
                         frame.move(x, y);
 
                         frame.info = Pixel(pos=Pos(row=pixel_row,col=pixel_col),parent=char)
+                        self.frames.append(frame)
+
+        label1 = QtGui.QLabel(self)
+        label1.setText("Paint with the left button, clear with the right!")
+        label1.move(margin, margin+16*(pix+pixSpace)+2*charSpace)
+        label1.setStyleSheet("QLabel { color: Black }")
+
+        label2 = QtGui.QLabel(self)
+        label2.setText("I see a white dot and I want it painted black...")
+        label2.move(360, label1.y())
+        label2.setStyleSheet("QLabel { color: Gray; font-style: italic }")
+
+        btClear = QtGui.QPushButton(self)
+        btClear.setText("Clear!")
+        btClear.move(margin+16*(5*(pix+pixSpace)+charSpace)-btClear.width(), label1.y())
+        btClear.clicked.connect(self.clearCanvas)
 
         self.show()
 
@@ -73,6 +91,17 @@ class Canvas(QtGui.QWidget):
                     target.setStyleSheet(paintSS)
                     self.packetFromChar(target.info.parent)
 
+    def clearCanvas(self):
+        for frame in self.frames:
+            frame.setStyleSheet(whiteSS)
+
+        for char in self.chars:
+            for i in range(len(char.pixels)):
+                for j in range(len(char.pixels[i])):
+                    char.pixels[i][j] = 0
+            self.packetFromChar(char)
+            time.sleep(.005)
+
     def mousePressEvent(self, event):
         self.pressed = True
 
@@ -80,8 +109,6 @@ class Canvas(QtGui.QWidget):
         self.pressed = False
 
     def packetFromChar(self, char):
-        print char
-
         rows = []
         for pix_row in range(8):
             row = 0
