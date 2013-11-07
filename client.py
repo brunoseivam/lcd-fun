@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 import serial
 import collections
 
@@ -50,12 +50,24 @@ class Canvas(QtGui.QWidget):
     def mouseMoveEvent(self, event):
         if(self.pressed):
             target = QtGui.qApp.widgetAt(QtGui.QCursor().pos())
-            if target is not None and target is not self:
-                target.setStyleSheet(blackSS)
+            if hasattr(target, "info"):
                 pixel_row = target.info.pos.row
                 pixel_col = target.info.pos.col
-                if target.info.parent.pixels[pixel_row][pixel_col] != 1:
-                    target.info.parent.pixels[pixel_row][pixel_col] = 1
+
+                paintColor = None
+                paintSS = None
+                if event.buttons() == QtCore.Qt.LeftButton:
+                    paintColor = 1
+                    paintSS = blackSS
+                elif event.buttons() == QtCore.Qt.RightButton:
+                    paintColor = 0
+                    paintSS = whiteSS
+                else:
+                    return
+
+                if target.info.parent.pixels[pixel_row][pixel_col] != paintColor:
+                    target.info.parent.pixels[pixel_row][pixel_col] = paintColor
+                    target.setStyleSheet(paintSS)
                     self.packetFromChar(target.info.parent)
 
     def mousePressEvent(self, event):
