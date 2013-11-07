@@ -1,20 +1,23 @@
 /*
- * LCD RS pin to digital pin 12
- * LCD Enable pin to digital pin 11
- * LCD D4 pin to digital pin 2
- * LCD D5 pin to digital pin 3
- * LCD D6 pin to digital pin 4
- * LCD D7 pin to digital pin 5
+ * LCD RS pin to digital pin 2
+ * LCD Enable pin to digital pin 3
+ * LCD D0 pin to digital pin 4
+ * LCD D1 pin to digital pin 5
+ * LCD D2 pin to digital pin 6
+ * LCD D3 pin to digital pin 7
+ * LCD D4 pin to digital pin 8
+ * LCD D5 pin to digital pin 9
+ * LCD D6 pin to digital pin 10
+ * LCD D7 pin to digital pin 11
  * LCD R/W pin to ground*/
 
 // include the library code:
 #include <LiquidCrystal.h>
 
 // initialize the library with the numbers of the interface pins
-LiquidCrystal lcd(12, 11, 5,4,3,2);
+LiquidCrystal lcd(2,3,4,5,6,7,8,9,10,11);
 
 byte image[2][16][8] = {};
-char img[2][17] = {"ABCDEFGHIJKLMNOP", "abcdefghijklmnop"};
 
 int wr = 4, clr = 0;
 struct
@@ -30,44 +33,25 @@ void setup() {
   lcd_char.count = 0;
 }
 
-void print_col(int col)
+void update_row(int row)
 {
-  byte cc = (col*2) & 0x07;  //custom carachter index
+  byte cc = ((clr*2) & 0x07) + row; // custom character index
   
-  lcd.createChar(cc, image[0][col]);
-  lcd.createChar(cc+1, image[1][col]);
+  lcd.createChar(cc, image[row][wr]);
   
-  lcd.setCursor(col, 0);
+  lcd.setCursor(clr, row);
+  lcd.print(' ');
+  lcd.setCursor(wr, row);
   lcd.write(cc);
-  lcd.setCursor(col, 1);
-  lcd.write(cc+1);
-}
-
-void print_col2(int col)
-{
-  for(int row = 0; row < 2; ++row)
-  {
-    lcd.setCursor(col, row);
-    lcd.print(img[row][col]);
-  }
-}
-
-void clear_col(int col)
-{
-  for(int row = 0; row < 2; ++row)
-  {
-    lcd.setCursor(col, row);
-    lcd.print(' ');
-  }
 }
 
 void loop() {
-  clear_col(clr);
-  print_col2(wr);
+  update_row(0);
+  update_row(1);
 
   wr = (wr + 1) & 0x0F;
   clr = (clr + 1) & 0x0F;
-  delay(500);
+  delay(1);
   
 }
 
@@ -103,18 +87,7 @@ void serialEvent() {
         
         for(i = 0; i < 8; ++i)
           image[lcd_char.row][lcd_char.col][i] = lcd_char.pixels[i];
-        
-        /*Serial.print(" x="); Serial.print(lcd_char.x);
-        Serial.print(" y="); Serial.print(lcd_char.y);
-        Serial.print("\n"); 
-        for(i = 0; i < 8; ++i)
-        {  
-          Serial.print("row");Serial.print(i);Serial.print("=");Serial.print(lcd_char.row[i],DEC);Serial.print(" ");
-        }
-        Serial.print("\n");
         break;
-      default:
-        break;*/
     }
   }
 }
